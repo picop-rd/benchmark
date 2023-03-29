@@ -15,8 +15,8 @@ spec:
     spec:
       containers:
         - name: proxy
-          image: "ghcr.io/hiroyaonoe/bcop-proxy/bcop-proxy:latest"
-          command: ['/bin/bcop-proxy', '--proxy-port', '80', '--admin-port', '9000', '--default-addr', 'service-http-main.service.svc.cluster.local:80', '--propagate=false', '--controller-url', 'http://proxy-controller.bcop-system.svc.cluster.local:8080', '--id', 'service-http']
+          image: "ghcr.io/picop-rd/proxy:latest"
+          command: ['/bin/proxy', '--proxy-port', '80', '--admin-port', '9000', '--default-addr', 'service-http-main.service.svc.cluster.local:80', '--propagate=false', '--controller-url', 'http://proxy-controller.picop-system.svc.cluster.local:8080', '--id', 'service-http']
           imagePullPolicy: Always
           ports:
             - name: proxy

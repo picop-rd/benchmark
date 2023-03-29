@@ -13,17 +13,17 @@ import (
 	"sync"
 	"time"
 
-	"github.com/hiroyaonoe/bcop-go/contrib/net/http/bcophttp"
-	"github.com/hiroyaonoe/bcop-go/propagation"
-	"github.com/hiroyaonoe/bcop-go/protocol/header"
+	"github.com/picop-rd/picop-go/contrib/net/http/picophttp"
+	"github.com/picop-rd/picop-go/propagation"
+	"github.com/picop-rd/picop-go/protocol/header"
 )
 
 func main() {
 	url := flag.String("url", "", "URL")
 
 	prefix := flag.String("prefix", "", "output csv file prefix")
-	envID := flag.String("env-id", "", "BCoP env-id")
-	bcop := flag.Bool("bcop", false, "use BCoP")
+	envID := flag.String("env-id", "", "PiCoP env-id")
+	picop := flag.Bool("picop", false, "use PiCoP")
 	reqPerSec := flag.Int("req-per-sec", 1000, "request per second")
 	reqDuration := flag.Int("duration", 10, "duration second")
 	clientNum := flag.Int("client-num", 16, "the number of client connections")
@@ -34,7 +34,7 @@ func main() {
 	now := time.Now().Local().Format(time.RFC3339)
 	reqTotal := *reqPerSec * *reqDuration
 
-	out := fmt.Sprintf("%s-latency-%s-%t-%d-%d-%d-%d-%s.csv", *prefix, *envID, *bcop, *reqPerSec, *reqDuration, *clientNum, *payload, now)
+	out := fmt.Sprintf("%s-latency-%s-%t-%d-%d-%d-%d-%s.csv", *prefix, *envID, *picop, *reqPerSec, *reqDuration, *clientNum, *payload, now)
 	fmt.Printf("Output file: %s\n", out)
 
 	if _, err := os.Stat(out); err == nil {
@@ -45,14 +45,14 @@ func main() {
 	client := http.DefaultClient
 	ctx := context.Background()
 
-	if *bcop {
+	if *picop {
 		client = &http.Client{
-			Transport: bcophttp.NewTransport(nil, propagation.EnvID{}),
+			Transport: picophttp.NewTransport(nil, propagation.EnvID{}),
 		}
 
 		h := header.NewV1()
 		h.Set(propagation.EnvIDHeader, *envID)
-		ctx = propagation.EnvID{}.Extract(ctx, propagation.NewBCoPCarrier(h))
+		ctx = propagation.EnvID{}.Extract(ctx, propagation.NewPiCoPCarrier(h))
 	}
 
 	ctx, cancel := context.WithCancel(ctx)
@@ -98,7 +98,7 @@ func main() {
 						fmt.Printf("Error %d:making request struct error: %s\n", count, err.Error())
 						return
 					}
-					if !*bcop {
+					if !*picop {
 						h := http.Header{}
 						h.Add(propagation.EnvIDHeader, *envID)
 						req.Header = h

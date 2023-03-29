@@ -1,8 +1,8 @@
-module github.com/hiroyaonoe/bcop/benchmark/script
+module github.com/picop-rd/benchmark/manyenvs/script
 
 go 1.19
 
-require github.com/hiroyaonoe/bcop-go v0.0.0-20230110173130-ccd8403dfdc4
+require github.com/picop-rd/picop-go v0.0.0-20230329085820-a9a0ec385191
 
 require (
 	go.opentelemetry.io/otel v1.11.2 // indirect

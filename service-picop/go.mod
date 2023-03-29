@@ -1,4 +1,4 @@
-module github.com/picop-rd/benchmark/latency/script
+module github.com/picop-rd/benchmark/service-picop
 
 go 1.19
 

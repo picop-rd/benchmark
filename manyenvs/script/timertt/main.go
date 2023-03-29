@@ -11,9 +11,9 @@ import (
 	"sync"
 	"time"
 
-	"github.com/hiroyaonoe/bcop-go/contrib/net/http/bcophttp"
-	"github.com/hiroyaonoe/bcop-go/propagation"
-	"github.com/hiroyaonoe/bcop-go/protocol/header"
+	"github.com/picop-rd/picop-go/contrib/net/http/picophttp"
+	"github.com/picop-rd/picop-go/propagation"
+	"github.com/picop-rd/picop-go/protocol/header"
 )
 
 var (
@@ -26,8 +26,8 @@ var (
 func main() {
 	url := flag.String("url", "", "URL")
 
-	envID := flag.String("env-id", "", "BCoP env-id")
-	bcop := flag.Bool("bcop", false, "use BCoP or not")
+	envID := flag.String("env-id", "", "PiCoP env-id")
+	picop := flag.Bool("picop", false, "use PiCoP or not")
 	reqPerSec := flag.Int("req-per-sec", 1000, "request per second")
 	reqDuration := flag.Int("duration", 10, "duration second")
 	clientNum := flag.Int("client-num", 16, "the number of client connections (equals the number of environments if no using proxy)")
@@ -41,14 +41,14 @@ func main() {
 	client := http.DefaultClient
 	ctx := context.Background()
 
-	if *bcop {
+	if *picop {
 		client = &http.Client{
-			Transport: bcophttp.NewTransport(nil, propagation.EnvID{}),
+			Transport: picophttp.NewTransport(nil, propagation.EnvID{}),
 		}
 
 		h := header.NewV1()
 		h.Set(propagation.EnvIDHeader, *envID)
-		ctx = propagation.EnvID{}.Extract(ctx, propagation.NewBCoPCarrier(h))
+		ctx = propagation.EnvID{}.Extract(ctx, propagation.NewPiCoPCarrier(h))
 	}
 
 	client.Timeout = 1 * time.Second
@@ -97,7 +97,7 @@ func main() {
 						raiseErr(fmt.Sprintf("% 6d;% 3d: making request struct", count, envNum), err)
 						return
 					}
-					if !*bcop {
+					if !*picop {
 						h := http.Header{}
 						h.Add(propagation.EnvIDHeader, *envID)
 						req.Header = h

@@ -1,22 +1,22 @@
 apiVersion: apps/v1
 kind: StatefulSet
 metadata:
-  name: proxy-bcop
+  name: proxy-picop
   namespace: service
 spec:
-  serviceName: proxy-bcop
+  serviceName: proxy-picop
   selector:
     matchLabels:
-      app: proxy-bcop
+      app: proxy-picop
   template:
     metadata:
       labels:
-        app: proxy-bcop
+        app: proxy-picop
     spec:
       containers:
         - name: proxy
-          image: "ghcr.io/hiroyaonoe/bcop-proxy/bcop-proxy:latest"
-          command: ['/bin/bcop-proxy', '--proxy-port', '80', '--admin-port', '9000', '--default-addr', 'service-bcop-main.service.svc.cluster.local:80', '--propagate=true', '--controller-url', 'http://proxy-controller.bcop-system.svc.cluster.local:8080', '--id', 'service-bcop']
+          image: "ghcr.io/picop-rd/proxy:latest"
+          command: ['/bin/proxy', '--proxy-port', '80', '--admin-port', '9000', '--default-addr', 'service-picop-main.service.svc.cluster.local:80', '--propagate=true', '--controller-url', 'http://proxy-controller.picop-system.svc.cluster.local:8080', '--id', 'service-picop']
           imagePullPolicy: Always
           ports:
             - name: proxy
@@ -37,12 +37,12 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: proxy-bcop
+  name: proxy-picop
   namespace: service
 spec:
   type: NodePort
   selector:
-    app: proxy-bcop
+    app: proxy-picop
   ports:
     - name: proxy
       protocol: TCP

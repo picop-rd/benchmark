@@ -1,7 +1,7 @@
 # syntax=docker/dockerfile:1
 FROM golang:1.19-bullseye AS builder
 
-WORKDIR /go/src/github.com/hiroyaonoe/bcop/benchmark/service-http
+WORKDIR /go/src/github.com/picop-rd/benchmark/service-http
 
 RUN mkdir -p -m 0600 ~/.ssh \
 	&& ssh-keyscan github.com >> ~/.ssh/known_hosts \
