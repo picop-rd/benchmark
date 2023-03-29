@@ -1,0 +1,22 @@
+apiVersion: networking.istio.io/v1beta1
+kind: VirtualService
+metadata:
+  name: service
+  namespace: service-istio
+spec:
+  hosts:
+  - service-http.service-istio.svc.cluster.local 
+  gateways:
+  - mesh
+  - gateway
+  http:
+  - match:
+    - headers:
+        env-id: 
+          exact: feature-1
+    route:
+    - destination:
+        host: service-http-feature-1.service-istio.svc.cluster.local
+  - route:
+    - destination:
+        host: service-http-main.service-istio.svc.cluster.local

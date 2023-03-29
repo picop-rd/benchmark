@@ -1,0 +1,15 @@
+apiVersion: networking.istio.io/v1beta1
+kind: Gateway
+metadata:
+  name: gateway
+  namespace: service-istio
+spec:
+  selector:
+    istio: ingressgateway # istio-ingressgatewayに付与されているラベル(どのIngress Gatewayに対してか)
+  servers:
+  - port:
+      number: 80 # Port80で受け付ける(Ingress Gatewayのどのポートか)
+      name: http
+      protocol: HTTP
+    hosts:
+    - "*" # 全ての宛先へのトラフィックを受け付ける

@@ -1,0 +1,90 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: proxy-http
+  namespace: service
+spec:
+  selector:
+    matchLabels:
+      app: proxy-http
+  template:
+    metadata:
+      labels:
+        app: proxy-http
+    spec:
+      containers:
+        - name: proxy
+          image: "ghcr.io/hiroyaonoe/bcop-proxy/bcop-proxy:latest"
+          command: ['/bin/bcop-proxy', '--proxy-port', '80', '--admin-port', '9000', '--default-addr', 'service-001.service.svc.cluster.local:80', '--propagate=false', '--controller-url', 'http://proxy-controller.bcop-system.svc.cluster.local:8080', '--id', 'service']
+          imagePullPolicy: Always
+          ports:
+            - name: proxy
+              containerPort: 80
+            - name: admin
+              containerPort: 9000
+          resources:
+            limits:
+              cpu: 100m
+              memory: 128Mi
+            requests:
+              cpu: 100m
+              memory: 128Mi
+      imagePullSecrets:
+        - name: ghcrcred
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: proxy-http
+  namespace: service
+spec:
+  type: NodePort
+  selector:
+    app: proxy-http
+  ports:
+    - name: proxy
+      protocol: TCP
+      port: 80
+      targetPort: 80
+      nodePort: 30100
+    - name: admin
+      protocol: TCP
+      port: 9000
+      targetPort: 9000
+      nodePort: 30101
+---
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: proxy-http
+  namespace: service
+spec:
+  minReplicas: 1
+  maxReplicas: 100
+  metrics:
+  - resource:
+      name: cpu
+      target:
+        averageUtilization: 80
+        type: Utilization
+    type: Resource
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: proxy-http
+  behavior:
+    scaleUp:
+      policies:
+      - periodSeconds: 5
+        type: Pods
+        value: 100
+      selectPolicy: Max
+      stabilizationWindowSeconds: 5
+    scaleDown:
+      policies:
+      - periodSeconds: 5
+        type: Pods
+        value: 100
+      selectPolicy: Max
+      stabilizationWindowSeconds: 180

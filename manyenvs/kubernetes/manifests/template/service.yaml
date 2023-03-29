@@ -1,0 +1,80 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: service-$(ENV)
+  labels:
+    env: service-$(ENV)
+spec:
+  selector:
+    matchLabels:
+      app: service-$(ENV)
+  template:
+    metadata:
+      labels:
+        app: service-$(ENV)
+    spec:
+      containers:
+        - name: service
+          image: nginx:1.23.3
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 80
+          resources:
+            limits:
+              cpu: 100m
+              memory: 128Mi
+            requests:
+              cpu: 100m
+              memory: 128Mi
+      imagePullSecrets:
+        - name: ghcrcred
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: service-$(ENV)
+spec:
+  type: NodePort
+  selector:
+    app: service-$(ENV)
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 80
+      nodePort: 32$(ENV)
+---
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: service-$(ENV)
+spec:
+  minReplicas: 1
+  maxReplicas: 100
+  metrics:
+  - resource:
+      name: cpu
+      target:
+        averageUtilization: 80
+        type: Utilization
+    type: Resource
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: service-$(ENV)
+  behavior:
+    scaleUp:
+      policies:
+      - periodSeconds: 5
+        type: Pods
+        value: 100
+      selectPolicy: Max
+      stabilizationWindowSeconds: 5
+    scaleDown:
+      policies:
+      - periodSeconds: 5
+        type: Pods
+        value: 100
+      selectPolicy: Max
+      stabilizationWindowSeconds: 180
+---
+
