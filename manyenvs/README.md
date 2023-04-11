@@ -1,6 +1,19 @@
-環境を増やすことによる各種データの変化をみる  
-環境は1~100まで変化させる  
-以下のデータを測定する  
-- CPU使用量
-- メモリ使用量
-- リクエストのレスポンス速度
+各条件でコンテナに負荷をかけてオートスケールした後のコンテナ数を計測する
+
+# 準備
+[共通の準備](../README.md)
+```
+cd kubernetes/manifests
+kubectl apply -f namespace.yaml proxy-http.yaml
+./script/create-service.sh 1 <環境数> | kubectl -n service apply -f -
+```
+
+# 計測
+
+```
+cd script
+go run timertt/main.go <条件に基づいて設定したオプション>
+```
+
+# 出力
+`kubectl`や`k9s`を利用して目視でコンテナ数を記録する
