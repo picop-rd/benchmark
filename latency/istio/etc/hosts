@@ -1,1 +1,2 @@
-10.229.71.125 service-http.service-istio.svc.cluster.local
+10.229.71.125 service-istio.service.svc.cluster.local
+10.229.71.125 service-both.service.svc.cluster.local
