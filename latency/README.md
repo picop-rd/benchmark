@@ -8,7 +8,9 @@ kubectl apply -f namespace.yaml
 kubectl apply -f proxy-http.yaml
 kubectl apply -f proxy-picop.yaml
 ./script/create-service.sh http main | kubectl -n service apply -f -
-./script/create-service.sh picop main | kubectl -n service apply -f -
+./script/create-service.sh http feature-1 | kubectl -n service apply -f -
+./script/create-service.sh http main | kubectl -n service-istio apply -f -
+./script/create-service.sh http feature-1 | kubectl -n service-istio apply -f -
 
 # Require istioctl
 # See https://istio.io/latest/docs/setup/getting-started/
