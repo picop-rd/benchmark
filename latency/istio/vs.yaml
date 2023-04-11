@@ -2,10 +2,10 @@ apiVersion: networking.istio.io/v1beta1
 kind: VirtualService
 metadata:
   name: service-istio
-  namespace: service
+  namespace: service-istio
 spec:
   hosts:
-  - service-istio.service.svc.cluster.local 
+  - service-istio.service-istio.svc.cluster.local 
   gateways:
   - mesh
   - gateway
@@ -16,23 +16,23 @@ spec:
           exact: feature-1
     route:
     - destination:
-        host: service-http-feature-1.service.svc.cluster.local
+        host: service-http-feature-1.service-istio.svc.cluster.local
   - route:
     - destination:
-        host: service-http-main.service.svc.cluster.local
+        host: service-http-main.service-istio.svc.cluster.local
 ---
 apiVersion: networking.istio.io/v1beta1
 kind: VirtualService
 metadata:
   name: service-both
-  namespace: service
+  namespace: service-istio
 spec:
   hosts:
-  - service-both.service.svc.cluster.local 
+  - service-both.service-istio.svc.cluster.local 
   gateways:
   - mesh
   - gateway
   http:
   - route:
     - destination:
-        host: service-http-main.service.svc.cluster.local
+        host: service-http-main.service-istio.svc.cluster.local
