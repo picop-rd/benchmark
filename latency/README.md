@@ -13,15 +13,16 @@ kubectl apply -f proxy-picop.yaml
 # Require istioctl
 # See https://istio.io/latest/docs/setup/getting-started/
 istioctl install --set profile=default -y
-kubectl delete -f save/istio-ingressgateqay-hpa.yaml
+kubectl delete -f save/istio-ingressgateway-hpa.yaml
 kubectl delete -f save/istiod-hpa.yaml
+# Deploymentのistio-ingressgateway, istiodのreplicasを5へ変更(hpaのmax値)
 
 cd istio
-kubectl apply namespave.yaml
-kubectl apply gateway.yaml
-kubectl apply vs.yaml
+kubectl apply -f namespace.yaml
+kubectl apply -f gateway.yaml
+kubectl apply -f vs.yaml
 
-cd scriot
+cd script
 ./register-proxies.sh <Proxy Controller URL>
 ./register-routes.sh <Proxy Controller URL>
 ```
