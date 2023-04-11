@@ -3,6 +3,10 @@ PiCoPやIstioのプロキシのあるなしでHTTPリクエストのレスポン
 # 準備
 [共通の準備](../README.md)
 ```
+cd script
+./register-proxies.sh <Proxy Controller URL>
+./register-routes.sh <Proxy Controller URL>
+
 cd kubernetes/manifests
 kubectl apply -f namespace.yaml 
 kubectl apply -f proxy-http.yaml
@@ -23,10 +27,7 @@ cd istio
 kubectl apply -f namespace.yaml
 kubectl apply -f gateway.yaml
 kubectl apply -f vs.yaml
-
-cd script
-./register-proxies.sh <Proxy Controller URL>
-./register-routes.sh <Proxy Controller URL>
+# etc/hostsの内容をベンチマーク実行マシンで適用する
 ```
 
 # 計測
