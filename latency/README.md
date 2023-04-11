@@ -4,17 +4,22 @@ PiCoPやIstioのプロキシのあるなしでHTTPリクエストのレスポン
 [共通の準備](../README.md)
 ```
 cd kubernetes/manifests
-kubectl apply -f namespace.yaml proxy-http.yaml proxy-picop.yaml
+kubectl apply -f namespace.yaml 
+kubectl apply -f proxy-http.yaml
+kubectl apply -f proxy-picop.yaml
 ./script/create-service.sh http main | kubectl -n service apply -f -
 ./script/create-service.sh picop main | kubectl -n service apply -f -
 
 # Require istioctl
 # See https://istio.io/latest/docs/setup/getting-started/
 istioctl install --set profile=default -y
-kubectl delete -f save/istio-ingressgateqay-hpa.yaml istiod-hpa.yaml
+kubectl delete -f save/istio-ingressgateqay-hpa.yaml
+kubectl delete -f save/istiod-hpa.yaml
 
 cd istio
-kubectl apply namespave.yaml gateway.yaml vs.yaml
+kubectl apply namespave.yaml
+kubectl apply gateway.yaml
+kubectl apply vs.yaml
 
 cd scriot
 ./register-proxies.sh <Proxy Controller URL>

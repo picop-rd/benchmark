@@ -7,5 +7,6 @@ Benchmark
 ## 各計測で共通の準備
 ```
 cd ../demo/kubernetes/manifests
-kubectl apply -f namespace.yaml proxy-controller.yaml
+kubectl apply -f namespace.yaml
+kubectl apply -f proxy-controller.yaml
 ```

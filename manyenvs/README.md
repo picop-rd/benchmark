@@ -4,7 +4,8 @@
 [共通の準備](../README.md)
 ```
 cd kubernetes/manifests
-kubectl apply -f namespace.yaml proxy-http.yaml
+kubectl apply -f namespace.yaml
+kubectl apply -f proxy-http.yaml
 ./script/create-service.sh 1 <環境数> | kubectl -n service apply -f -
 ```
 
