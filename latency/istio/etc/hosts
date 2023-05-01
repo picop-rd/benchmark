@@ -1,2 +1,2 @@
 10.229.71.125 service-istio.service-istio.svc.cluster.local
-10.229.71.125 service-both.service-istio.svc.cluster.local
+10.229.71.125 proxy-both.service.svc.cluster.local

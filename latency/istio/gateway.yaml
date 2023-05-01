@@ -12,4 +12,10 @@ spec:
       name: http
       protocol: HTTP
     hosts:
-    - "*" # 全ての宛先へのトラフィックを受け付ける
+    - "service-istio.service-istio.svc.cluster.local"
+  - port:
+      number: 9080
+      name: picop
+      protocol: TCP
+    hosts:
+    - "proxy-both.service.svc.cluster.local"

@@ -24,15 +24,19 @@ spec:
 apiVersion: networking.istio.io/v1beta1
 kind: VirtualService
 metadata:
-  name: service-both
+  name: proxy-both
   namespace: service-istio
 spec:
   hosts:
-  - service-both.service-istio.svc.cluster.local 
+  - proxy-both.service.svc.cluster.local 
   gateways:
   - mesh
   - gateway
-  http:
-  - route:
+  tcp:
+  - match:
+    - port: 9080
+    route:
     - destination:
-        host: service-http-main.service-istio.svc.cluster.local
+        host: proxy-both.service.svc.cluster.local
+        port:
+          number: 80

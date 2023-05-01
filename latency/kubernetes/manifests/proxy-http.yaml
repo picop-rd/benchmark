@@ -1,10 +1,9 @@
 apiVersion: apps/v1
-kind: StatefulSet
+kind: Deployment
 metadata:
   name: proxy-http
   namespace: service
 spec:
-  serviceName: proxy-http
   selector:
     matchLabels:
       app: proxy-http
