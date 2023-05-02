@@ -1,0 +1,39 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: service-http-main
+  namespace: service
+  labels:
+    env: main
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: service-http-main
+  template:
+    metadata:
+      labels:
+        app: service-http-main
+    spec:
+      containers:
+        - name: service
+          image: nginx:1.23.3
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 80
+      imagePullSecrets:
+        - name: ghcrcred
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: service-http-main
+  namespace: service
+spec:
+  type: NodePort
+  selector:
+    app: service-http-main
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 80
