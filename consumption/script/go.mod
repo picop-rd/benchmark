@@ -1,4 +1,4 @@
-module github.com/picop-rd/benchmark/manyenvs/script
+module github.com/picop-rd/benchmark/consumption/script
 
 go 1.19
 

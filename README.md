@@ -2,6 +2,6 @@
 Some benchmarks for PiCoP protocol, proxy, and system.
 
 See the following directories for the methods and the paper for the results.
-- [Proxy Communication Delay](./latency)
-- [Resource Reduction](./manyenvs)
-
+- [Proxy Communication Delay](./delay)
+- [Proxy Resource Consumption](./consumption)
+- [Resource Reduction](./reduction)

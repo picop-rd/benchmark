@@ -1,4 +1,4 @@
-module github.com/picop-rd/benchmark/resource/script
+module github.com/picop-rd/benchmark/reduction/script
 
 go 1.19
 

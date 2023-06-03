@@ -1,4 +1,4 @@
-module github.com/picop-rd/benchmark/latency/script
+module github.com/picop-rd/benchmark/delay/script
 
 go 1.19
 
