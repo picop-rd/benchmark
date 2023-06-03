@@ -1,7 +1,9 @@
-PiCoPやIstioのプロキシのあるなしでHTTPリクエストのレスポンスタイムを比較する
+# Proxy Communication Delay
+You can compare HTTP request response time with/without PiCoP/Istio proxy.
 
-# 準備
-[共通の準備](../README.md)
+# Preparation
+[Common Steps](../docs/common.md)
+
 ```
 cd script
 ./register-proxies.sh <Proxy Controller URL>
@@ -18,51 +20,50 @@ kubectl apply -f proxy-both.yaml
 
 # Require istioctl
 # See https://istio.io/latest/docs/setup/getting-started/
+cd istio
 istioctl install --set profile=default -y
 kubectl delete -f save/istio-ingressgateway-hpa.yaml
 kubectl delete -f save/istiod-hpa.yaml
-# Deploymentのistio-ingressgateway, istiodのreplicasを5へ変更(hpaのmax値)
+# Please change replicas of Deployments `istio-ingressgateway` and `istiod` to 5 (max value of hpa).
 
 cd istio
 kubectl apply -f namespace.yaml
 kubectl apply -f gateway.yaml
 kubectl apply -f vs.yaml
 kubectl apply -f ingressgateway-svc.yaml
-# etc/hostsの内容をベンチマーク実行マシンで適用する
+# Please append etc/hosts to that of the benchmark machine.(Please replace the IP address 192.168.0.2 with that of the Kubernetes Cluster.)
 ```
 
-# 計測
-
+# Measurements
 ```
 cd script
-go run timertt/main.go <条件に基づいて設定したオプション>
+go run timertt/main.go <options>
 ```
 
-- --client-numを1~64で変更して計測
-- URLに含まれるport番号は各serviceのNodePortを参照して設定
+Please change --client-num from 1~64
 ### base
 ```
-go run timertt/main.go --url http://service-istio.service-istio.svc.cluster.local:30830 --prefix no-http-main-2-1Gi-100m-128Mi --env-id main --req-per-sec 1000 --duration 10 --client-num 1 --payload 1000
+go run timertt/main.go --url http://service-istio.service-istio.svc.cluster.local:32001 --prefix base --env-id main --req-per-sec 1000 --duration 10 --client-num 1 --payload 1000
 ```
 ### base+proposed
 ```
-go run timertt/main.go --url http://service-istio.service-istio.svc.cluster.local:30100 --prefix proxy-http-main-2-1Gi-100m-128Mi --env-id main --req-per-sec 1000 --duration 10 --client-num 1 --payload 1000 --picop
+go run timertt/main.go --url http://service-istio.service-istio.svc.cluster.local:31002 --prefix base+proposed --env-id main --req-per-sec 1000 --duration 10 --client-num 1 --payload 1000 --picop
 ```
 ### base+gw+istio
 ```
-go run timertt/main.go --url http://service-istio.service-istio.svc.cluster.local:30031 --prefix istio-http-main-2-1Gi-100m-128Mi --env-id main --req-per-sec 1000 --duration 10 --client-num 1 --payload 1000
+go run timertt/main.go --url http://service-istio.service-istio.svc.cluster.local:30001 --prefix base+gw+istio --env-id main --req-per-sec 1000 --duration 10 --client-num 1 --payload 1000
 ```
 ### base+gw+proposed
 ```
-go run timertt/main.go --url http://proxy-both.service.svc.cluster.local:30603 --prefix both-http-main-2-1Gi-100m-128Mi --env-id main --req-per-sec 1000 --duration 10 --client-num 1 --payload 1000 --picop
+go run timertt/main.go --url http://proxy-both.service.svc.cluster.local:30002 --prefix base+gw+proposed --env-id main --req-per-sec 1000 --duration 10 --client-num 1 --payload 1000 --picop
 ```
 
-# 出力
-CSV形式で出力される。各カラムは
+# Outputs
+CSV format
 ```
-count: 番号
-latency: リクエストを送信してからレスポンスが帰ってくるまでの時間(ns)
-start: リクエスト送信時間(ns)
-end: レスポンス受信時間(ns)
+count: Request Index
+latency: Response Time[ns]
+start: Request Sending Time[ns] (Accuracy in ms)
+end: Response Receiving Time[ns] (Accuracy in ms)
 ```
 

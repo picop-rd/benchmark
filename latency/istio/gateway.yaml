@@ -5,10 +5,10 @@ metadata:
   namespace: service-istio
 spec:
   selector:
-    istio: ingressgateway # istio-ingressgatewayに付与されているラベル(どのIngress Gatewayに対してか)
+    istio: ingressgateway
   servers:
   - port:
-      number: 80 # Port80で受け付ける(Ingress Gatewayのどのポートか)
+      number: 80
       name: http
       protocol: HTTP
     hosts:

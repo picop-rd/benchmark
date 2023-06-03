@@ -59,7 +59,6 @@ func main() {
 	signal.Notify(stopper, os.Interrupt)
 
 	i := 0
-	// 終了はカウントで測るので不要
 	// after := time.After(time.Duration(*reqDuration) * time.Second)
 	for {
 		select {

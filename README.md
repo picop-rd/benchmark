@@ -1,12 +1,7 @@
 # benchmark
-Benchmark
+Some benchmarks for PiCoP protocol, proxy, and system.
 
-## 計測
-- [Proxy Communication Delay](./latency/README.md)
-- [Resource Reduction](./manyenvs/README.md)
-## 各計測で共通の準備
-```
-cd ../demo/kubernetes/manifests
-kubectl apply -f namespace.yaml
-kubectl apply -f proxy-controller.yaml
-```
+See the following directories for the methods and the paper for the results.
+- [Proxy Communication Delay](./latency)
+- [Resource Reduction](./manyenvs)
+

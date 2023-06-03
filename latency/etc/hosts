@@ -1,0 +1,2 @@
+192.168.0.2 service-istio.service-istio.svc.cluster.local
+192.168.0.2 proxy-both.service.svc.cluster.local

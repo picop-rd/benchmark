@@ -73,12 +73,11 @@ func main() {
 		if *useProxy {
 			URLList[i] = *url
 		} else {
-			URLList[i] = fmt.Sprintf("%s%03d", *url, i) // port番号を環境によって連続で変化させる
+			URLList[i] = fmt.Sprintf("%s%03d", *url, i) // Change port
 		}
 	}
 
 	i := 0
-	// 終了はカウントで測るので不要
 	// after := time.After(time.Duration(*reqDuration) * time.Second)
 	for {
 		select {
