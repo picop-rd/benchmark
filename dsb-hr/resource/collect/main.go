@@ -57,6 +57,7 @@ func main() {
 	log.Printf("created: %s\n", dirname)
 
 	collect(ctx, dirname, cmd, *interval, *duration)
+	log.Println("completed")
 }
 
 func collect(ctx context.Context, dirname string, cmd []string, interval, duration int) {
@@ -64,36 +65,41 @@ func collect(ctx context.Context, dirname string, cmd []string, interval, durati
 	after := time.After(time.Duration(duration) * time.Second)
 	ticker := time.NewTicker(time.Duration(interval) * time.Second)
 	for cnt := 0; ; cnt++{
-		wg.Add(1)
 		select {
 		case <-ctx.Done():
 			return
 		case <-after:
+			log.Println("waiting")
 			wg.Wait()
 			return
 		case <-ticker.C:
-			log.Printf("exec command: %d\n", cnt)
-			go func() {
-				execCmd(dirname, cmd)
+			wg.Add(1)
+			go func(cnt int) {
+				log.Printf("exec command: %d\n", cnt)
+				err := execCmd(dirname, cmd)
+				if err != nil {
+					fmt.Printf("exec command %d error: %v\n", cnt, err)
+				}
 				wg.Done()
-			}()
+				log.Printf("finished: %d\n", cnt)
+			}(cnt)
 		}
 	}
 }
 
-func execCmd(dirname string, cmd []string) {
+func execCmd(dirname string, cmd []string) error {
+	now := time.Now().Unix()
 	c := exec.Command(cmd[0], cmd[1:]...)
 	bytes, err := c.Output()
 	c.Stderr = os.Stderr
 	if err != nil {
-		fmt.Printf("exec command error: %v\n", err)
-		return
+		return err
 	}
-	file := filepath.Join(dirname, fmt.Sprintf("%d", time.Now().Unix()))
+	file := filepath.Join(dirname, fmt.Sprintf("%d", now))
 	err = os.WriteFile(file, bytes, 0644)
 	if err != nil {
-		fmt.Printf("write file error: %v\n", err)
-		return
+		return err
 	}
 	log.Printf("saved file: %s\n", file)
+	return nil
 }

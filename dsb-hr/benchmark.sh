@@ -10,10 +10,11 @@ CONN=10
 RPS=100
 CMD="./wrks/wrk -D exp -t 1 -c $CONN -d $DURATION -L -R $RPS -S -r -s $LUA $URL"
 
-ssh onoe-benchmark "cd DeathStarBench && ./latency/collect.sh $CMD ./latency/data/$NAME $TIMESTAMP" &
+ssh onoe-benchmark "cd benchmark/dsb-hr && ./latency/collect.sh '$CMD' ./latency/data/$NAME $TIMESTAMP" &
 
 go run ./resource/collect/main.go -name $NAME -timestamp $TIMESTAMP -dir ./resource/data/input -interval 10 -duration 300 kubectl top pod -n dsb-hr &
 
 wait
 
+scp onoe-benchmark:benchmark/dsb-hr/latency/data/$NAME/$TIMESTAMP.txt ./latency/data/$NAME/$TIMESTAMP.txt
 go run ./resource/parse/main.go -name $NAME -timestamp $TIMESTAMP -input ./resource/data/input -output ./resource/data/output
