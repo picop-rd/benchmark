@@ -1,6 +1,10 @@
 #!/bin/bash -eux
 
 LUA_NAME=mixed-workload_type_1
+# LUA_NAME=recommend
+# LUA_NAME=reserve
+# LUA_NAME=search_hotel
+# LUA_NAME=user_login
 
 URL="http://10.229.71.125:31000"
 LUA_DIR="./scripts/hotel-reservation/$LUA_NAME.lua"
@@ -13,6 +17,18 @@ INTERVAL=10
 
 NAME=$LUA_NAME-$CONN-$RPS-$DURATION-$INTERVAL
 TIMESTAMP=$(date +%s)
+
+cleanup() {
+    echo "SIGINT received, cleaning up..."
+    ssh onoe-benchmark "pkill -2 --echo 'wrk'"
+    ssh onoe-benchmark "pkill -2 --echo 'tee'"
+    ssh onoe-benchmark "pkill -2 --echo 'collect.sh'"
+
+    kill $(jobs -p)
+    exit 1
+}
+
+trap 'cleanup' SIGINT
 
 ssh onoe-benchmark "cd benchmark/dsb-hr && ./latency/collect.sh '$CMD' ./latency/data/$NAME $TIMESTAMP" &
 
