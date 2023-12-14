@@ -19,21 +19,25 @@ type PodUsage struct {
 }
 
 func main() {
-	input := flag.String("input", "", "input file path")
-	output := flag.String("output", "", "output file path")
+	name := flag.String("name", "", "project name")
+	timestamp := flag.String("timestamp", "", "timestamp to exec command (RFC3339)")
+	input := flag.String("input", "", "input dir path")
+	output := flag.String("output", "", "output dir path")
 	flag.Parse()
 
-	if len(*input) == 0 || len(*output) == 0 {
+	if len(*input) == 0 || len(*output) == 0 || len(*name) == 0 || len(*timestamp) == 0 {
 		flag.Usage()
 		return
 	}
 
-	fmt.Printf("input file path: %s\n", *input)
-	fmt.Printf("output file path: %s\n", *output)
+	fmt.Printf("name: %s\n", *name)
+	fmt.Printf("timestamp: %s\n", *timestamp)
+	fmt.Printf("input dir path: %s\n", *input)
+	fmt.Printf("output dir path: %s\n", *output)
 
 	// Directory where the .txt files are stored
-	inputDir := *input
-	outputDir := *output
+	inputDir := filepath.Join(*input, *name, *timestamp)
+	outputDir := filepath.Join(*output, *name, *timestamp)
 
 	// Maps to store pod usages
 	cpuUsage := make(map[string]*PodUsage)

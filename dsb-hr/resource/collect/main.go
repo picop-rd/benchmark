@@ -17,6 +17,7 @@ import (
 func main() {
 	dir := flag.String("dir", "", "directory to save data")
 	name := flag.String("name", "", "project name")
+	timestamp := flag.String("timestamp", "", "timestamp to exec command (RFC3339)")
 	interval := flag.Int("interval", 10, "interval to exec command (second)")
 	duration := flag.Int("duration", 300, "duration to exec command (second)")
 	flag.Parse()
@@ -24,11 +25,12 @@ func main() {
 
 	fmt.Printf("dir: %s\n", *dir)
 	fmt.Printf("name: %s\n", *name)
+	fmt.Printf("timestamp: %s\n", *timestamp)
 	fmt.Printf("interval: %d\n", *interval)
 	fmt.Printf("duration: %d\n", *duration)
 	fmt.Printf("cmd: %s\n", strings.Join(cmd, " "))
 
-	if len(*dir) == 0 || len(*name) == 0 || *interval == 0 || *duration == 0 || len(cmd) < 2 {
+	if len(*dir) == 0 || len(*name) == 0 || *interval == 0 || *duration == 0 || len(cmd) < 2 || len(*timestamp) == 0 {
 		flag.Usage()
 		return
 	}
@@ -42,8 +44,11 @@ func main() {
 		cancel()
 	}()
 
-	start := time.Now().Format(time.RFC3339)
-	dirname := filepath.Join(*dir, fmt.Sprintf("%s-%s", *name, start))
+	dirname := filepath.Join(*dir, *name, *timestamp)
+	if _, err := os.Stat(dirname); err == nil {
+		fmt.Printf("duplicated timestamp: %s\n", dirname)
+		return
+	}
 	err := os.MkdirAll(dirname, 0755)
 	if err != nil {
 		fmt.Printf("mkdir error: %v\n", err)
