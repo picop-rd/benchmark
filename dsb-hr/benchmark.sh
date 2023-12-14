@@ -1,15 +1,17 @@
 #!/bin/bash -eux
 
+LUA_NAME=mixed-workload_type_1
+
 URL="http://10.229.71.125:31000"
-LUA="./scripts/hotel-reservation/mixed-workload_type_1.lua"
+LUA_DIR="./scripts/hotel-reservation/$LUA_NAME.lua"
 DURATION=300
 CONN=10
 RPS=1000
-CMD="./wrks/wrk -D exp -t 1 -c $CONN -d $DURATION -L -R $RPS -S -r -s $LUA $URL"
+CMD="./wrks/wrk -D exp -t 1 -c $CONN -d $DURATION -L -R $RPS -S -r -s $LUA_DIR $URL"
 
 INTERVAL=10
 
-NAME=mixed-$CONN-$RPS-$DURATION-$INTERVAL
+NAME=$LUA_NAME-$CONN-$RPS-$DURATION-$INTERVAL
 TIMESTAMP=$(date +%s)
 
 ssh onoe-benchmark "cd benchmark/dsb-hr && ./latency/collect.sh '$CMD' ./latency/data/$NAME $TIMESTAMP" &
