@@ -1,5 +1,8 @@
 #!/bin/bash -eux
 
+TYPE="base"
+# TYPE="picop"
+
 LUA_NAME=mixed-workload_type_1
 # LUA_NAME=recommend
 # LUA_NAME=reserve
@@ -30,12 +33,12 @@ cleanup() {
 
 trap 'cleanup' SIGINT
 
-ssh onoe-benchmark "cd benchmark/dsb-hr && ./latency/collect.sh '$CMD' ./latency/data/$NAME $TIMESTAMP" &
+ssh onoe-benchmark "cd benchmark/dsb-hr && ./latency/collect.sh '$CMD' ./latency/data/$TYPE/$NAME $TIMESTAMP" &
 
-go run ./resource/collect/main.go -name $NAME -timestamp $TIMESTAMP -dir ./resource/data/input -interval $INTERVAL -duration $DURATION kubectl top pod -n dsb-hr &
+go run ./resource/collect/main.go -name $NAME -timestamp $TIMESTAMP -dir ./resource/data/input/$TYPE -interval $INTERVAL -duration $DURATION kubectl top pod -n dsb-hr &
 
 wait
 
-mkdir -p ./latency/data/$NAME
-scp onoe-benchmark:benchmark/dsb-hr/latency/data/$NAME/$TIMESTAMP.txt ./latency/data/$NAME/$TIMESTAMP.txt
-go run ./resource/parse/main.go -name $NAME -timestamp $TIMESTAMP -input ./resource/data/input -output ./resource/data/output
+mkdir -p ./latency/data/$TYPE/$NAME
+scp onoe-benchmark:benchmark/dsb-hr/latency/data/$NAME/$TIMESTAMP.txt ./latency/data/$TYPE/$NAME/$TIMESTAMP.txt
+go run ./resource/parse/main.go -name $NAME -timestamp $TIMESTAMP -input ./resource/data/input/$TYPE -output ./resource/data/output/$TYPE
