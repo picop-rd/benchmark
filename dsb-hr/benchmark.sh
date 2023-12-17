@@ -40,5 +40,5 @@ go run ./resource/collect/main.go -name $NAME -timestamp $TIMESTAMP -dir ./resou
 wait
 
 mkdir -p ./latency/data/$TYPE/$NAME
-scp onoe-benchmark:benchmark/dsb-hr/latency/data/$NAME/$TIMESTAMP.txt ./latency/data/$TYPE/$NAME/$TIMESTAMP.txt
+scp onoe-benchmark:benchmark/dsb-hr/latency/data/$TYPE/$NAME/$TIMESTAMP.txt ./latency/data/$TYPE/$NAME/$TIMESTAMP.txt
 go run ./resource/parse/main.go -name $NAME -timestamp $TIMESTAMP -input ./resource/data/input/$TYPE -output ./resource/data/output/$TYPE
