@@ -4,6 +4,7 @@ import argparse
 
 def create_stacked_bar_chart(data_dir):
 	for i in ("cpu", "memory"):
+		plt.clf()
 		# Load the data from the CSV file
 		df = pd.read_csv(data_dir+"/"+i+".csv", index_col='type')
 		print(df)
