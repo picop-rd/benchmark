@@ -8,6 +8,7 @@ import (
 	"log"
 	"os"
 	"path/filepath"
+	"sort"
 	"strconv"
 	"strings"
 )
@@ -68,11 +69,31 @@ func main() {
 		return
 	}
 	log.Printf("created: %s\n", outputDir)
-	// Export to CSV
-	exportToCSV(cpuUsage, filepath.Join(outputDir, "cpu.csv"))
-	log.Printf("exported: %s\n", filepath.Join(outputDir, "cpu.csv"))
-	exportToCSV(memoryUsage, filepath.Join(outputDir, "memory.csv"))
-	log.Printf("exported: %s\n", filepath.Join(outputDir, "memory.csv"))
+	// Export to Raw CSV
+	rawDir := filepath.Join(outputDir, "raw")
+	err = os.MkdirAll(rawDir, 0755)
+	if err != nil {
+		fmt.Printf("mkdir error: %v\n", err)
+		return
+	}
+	log.Printf("created: %s\n", rawDir)
+	exportToRawCSV(cpuUsage, filepath.Join(rawDir, "cpu.csv"))
+	log.Printf("exported: %s\n", filepath.Join(rawDir, "cpu.csv"))
+	exportToRawCSV(memoryUsage, filepath.Join(rawDir, "memory.csv"))
+	log.Printf("exported: %s\n", filepath.Join(rawDir, "memory.csv"))
+
+	// Export to Org CSV
+	orgDir := filepath.Join(outputDir, "org")
+	err = os.MkdirAll(orgDir, 0755)
+	if err != nil {
+		fmt.Printf("mkdir error: %v\n", err)
+		return
+	}
+	log.Printf("created: %s\n", orgDir)
+	exportToOrgTxt(cpuUsage, filepath.Join(orgDir, "cpu.txt"))
+	log.Printf("exported: %s\n", filepath.Join(orgDir, "cpu.txt"))
+	exportToOrgTxt(memoryUsage, filepath.Join(orgDir, "memory.txt"))
+	log.Printf("exported: %s\n", filepath.Join(orgDir, "memory.txt"))
 }
 
 func processFile(file *os.File, unixTime int, cpu, memory map[string]*PodUsage) {
@@ -140,7 +161,7 @@ func convertMemoryValue(raw string) (int, error) {
 	}
 }
 
-func exportToCSV(data map[string]*PodUsage, filename string) {
+func exportToRawCSV(data map[string]*PodUsage, filename string) {
 	file, err := os.Create(filename)
 	if err != nil {
 		fmt.Println("Error creating CSV file:", err)
@@ -173,4 +194,35 @@ func exportToCSV(data map[string]*PodUsage, filename string) {
 		}
 		writer.Write(row)
 	}
+}
+
+func exportToOrgTxt(data map[string]*PodUsage, filename string) {
+	res := 0.0
+	for _, usage := range data {
+		ints := make([]int, 0, len(usage.Data))
+		for _, value := range usage.Data {
+			ints = append(ints, value)
+		}
+		avg := calculateAverage(ints)
+		res += avg
+	}
+
+	file, err := os.Create(filename)
+	if err != nil {
+		fmt.Println("Error creating Txt file:", err)
+		return
+	}
+	defer file.Close()
+
+	file.Write([]byte(fmt.Sprintf("%f", res)))
+}
+
+func calculateAverage(values []int) float64 {
+	sort.Ints(values)
+	trimmedValues := values[len(values)/20 : 19*len(values)/20] // 上位下位5%を除外
+	var sum int
+	for _, v := range trimmedValues {
+		sum += v
+	}
+	return float64(sum) / float64(len(trimmedValues))
 }

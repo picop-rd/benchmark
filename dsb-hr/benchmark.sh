@@ -1,13 +1,20 @@
 #!/bin/bash -eux
 
-TYPE="base"
-# TYPE="picop"
+if [ "$#" -ne 1 ]; then
+	echo "Usage: $0 <prefix>"
+	exit 1
+fi
+
+PREFIX=$1
 
 LUA_NAME=mixed-workload_type_1
 # LUA_NAME=recommend
 # LUA_NAME=reserve
 # LUA_NAME=search_hotel
 # LUA_NAME=user_login
+
+# base or picop
+TYPE=$(cd ../../DeathStarBench && git branch --contains | cut -d " " -f 2)
 
 URL="http://10.229.71.125:31000"
 LUA_DIR="./scripts/hotel-reservation/$LUA_NAME.lua"
@@ -18,8 +25,12 @@ CMD="./wrks/wrk -D exp -t 1 -c $CONN -d $DURATION -L -R $RPS -S -r -s $LUA_DIR $
 
 INTERVAL=10
 
-NAME=$LUA_NAME-$CONN-$RPS-$DURATION-$INTERVAL
+NAME="$PREFIX/$LUA_NAME-$CONN-$RPS-$DURATION-$INTERVAL"
 TIMESTAMP=$(date +%s)
+
+echo "TYPE: $TYPE"
+echo "NAME: $NAME"
+echo "TIMESTAMP: $TIMESTAMP"
 
 cleanup() {
     echo "SIGINT received, cleaning up..."
