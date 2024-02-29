@@ -20,7 +20,7 @@ if [ -e $filename ]; then
 	exit 1
 fi
 
-echo "\$ time ${cmd}" > $filename
+echo "\$ ${cmd}" > $filename
 
 # コマンドの実行と出力の保存
-eval time $cmd | tee -a $filename
+eval $cmd | tee -a $filename

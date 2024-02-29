@@ -10,8 +10,8 @@ PREFIX=$1
 URL="http://10.229.71.125:32001"
 ENVID=main
 DURATION=300
-CONN=10
-RPS=50
+CONN=1
+RPS=5000
 PAYLOAD=1000
 
 INTERVAL=10
@@ -19,7 +19,7 @@ INTERVAL=10
 NAME="$PREFIX/$ENVID-$CONN-$RPS-$DURATION-$PAYLOAD-$INTERVAL"
 TIMESTAMP=$(date +%s)
 
-CMD="go run ./script/main.go --url $URL --env-id $ENVID --req-per-sec $RPS --duration $DURATION --client-num $CONN --payload $PAYLOAD --picop"
+CMD="/usr/local/go/bin/go run ./script/main.go --url $URL --env-id $ENVID --req-per-sec $RPS --duration $DURATION --client-num $CONN --payload $PAYLOAD --picop"
 
 echo "NAME: $NAME"
 echo "TIMESTAMP: $TIMESTAMP"
