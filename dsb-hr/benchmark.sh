@@ -7,9 +7,9 @@ fi
 
 PREFIX=$1
 
-LUA_NAME=mixed-workload_type_1
+# LUA_NAME=mixed-workload_type_1
 # LUA_NAME=recommend
-# LUA_NAME=reserve
+LUA_NAME=reserve
 # LUA_NAME=search_hotel
 # LUA_NAME=user_login
 
@@ -20,7 +20,7 @@ URL="http://10.229.71.125:31000"
 LUA_DIR="./scripts/hotel-reservation/$LUA_NAME.lua"
 DURATION=300
 CONN=10
-RPS=1000
+RPS=50
 CMD="./wrks/wrk -D exp -t 1 -c $CONN -d $DURATION -L -R $RPS -S -r -s $LUA_DIR $URL"
 
 INTERVAL=10

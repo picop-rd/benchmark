@@ -15,10 +15,15 @@ def create_stacked_bar_chart(data_dir):
 
 		plt.bar(df.columns, df.loc['base'], label='base', alpha=0.5)
 		plt.bar(df.columns, df.loc['picop'], label='picop', alpha=0.5)
+		plt.legend(loc='lower left')
+		plt.grid(axis='y')
 
 		# Adding labels and title
-		plt.xlabel('Type')
-		plt.ylabel(i)
+		plt.xlabel('Senario')
+		if i == "cpu":
+			plt.ylabel('vCPU [m core]')
+		else:
+			plt.ylabel('Memory [MiB]')
 
 		# Save the plot to the specified output path
 		plt.savefig(data_dir+"/"+i+".png")
