@@ -36,12 +36,12 @@ cleanup() {
 
 trap 'cleanup' SIGINT
 
-ssh onoe-benchmark "cd benchmark/consumption && ./exec-cmd.sh '$CMD' ./data/$NAME/cmd $TIMESTAMP" &
+ssh onoe-benchmark "cd benchmark/consumption && ./exec-cmd.sh '$CMD' ./data/cmd/$NAME $TIMESTAMP" &
 
 go run ./collect/main.go -name $NAME -timestamp $TIMESTAMP -dir ./data/input -interval $INTERVAL -duration $DURATION kubectl top pod -n service-proxy &
 
 wait
 
 mkdir -p ./data/$NAME/cmd
-scp onoe-benchmark:benchmark/consumption/data/$NAME/cmd/$TIMESTAMP.txt ./data/$NAME/cmd/$TIMESTAMP.txt
+scp onoe-benchmark:benchmark/consumption/data/cmd/$NAME/$TIMESTAMP.txt ./data/cmd/$NAME/$TIMESTAMP.txt
 go run ./parse/main.go -name $NAME -timestamp $TIMESTAMP -input ./data/input -output ./data/output
