@@ -13,6 +13,7 @@ spec:
       labels:
         app: proxy-http
     spec:
+      nodeName: onoe-k8s-2
       containers:
         - name: proxy
           image: "ghcr.io/picop-rd/proxy:latest"

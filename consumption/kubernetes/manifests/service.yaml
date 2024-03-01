@@ -15,6 +15,7 @@ spec:
       labels:
         app: service-http-main
     spec:
+      nodeName: onoe-k8s-2
       containers:
         - name: service
           image: nginx:1.23.3

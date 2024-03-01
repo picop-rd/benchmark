@@ -11,7 +11,7 @@ URL="http://10.229.71.125:32001"
 ENVID=main
 DURATION=300
 CONN=1
-RPS=5000
+RPS=1000
 PAYLOAD=1000
 
 INTERVAL=10
@@ -42,6 +42,6 @@ go run ./collect/main.go -name $NAME -timestamp $TIMESTAMP -dir ./data/input -in
 
 wait
 
-mkdir -p ./data/$NAME/cmd
+mkdir -p ./data/cmd/$NAME
 scp onoe-benchmark:benchmark/consumption/data/cmd/$NAME/$TIMESTAMP.txt ./data/cmd/$NAME/$TIMESTAMP.txt
 go run ./parse/main.go -name $NAME -timestamp $TIMESTAMP -input ./data/input -output ./data/output
