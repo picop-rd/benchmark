@@ -15,6 +15,10 @@ import (
 
 const podPrefixLength = len("-6fd889d5dd-fnkpv")
 
+var (
+	orgNames = []string{"prox", "ingress", "mongodb", "memcached"}
+)
+
 type PodUsage struct {
 	Data map[int]int
 }
@@ -94,6 +98,10 @@ func main() {
 	log.Printf("exported: %s\n", filepath.Join(orgDir, "cpu.txt"))
 	exportToOrgTxt(memoryUsage, filepath.Join(orgDir, "memory.txt"))
 	log.Printf("exported: %s\n", filepath.Join(orgDir, "memory.txt"))
+	exportToOrgCsv(cpuUsage, filepath.Join(orgDir, "cpu.csv"))
+	log.Printf("exported: %s\n", filepath.Join(orgDir, "cpu.csv"))
+	exportToOrgCsv(memoryUsage, filepath.Join(orgDir, "memory.csv"))
+	log.Printf("exported: %s\n", filepath.Join(orgDir, "memory.csv"))
 }
 
 func processFile(file *os.File, unixTime int, cpu, memory map[string]*PodUsage) {
@@ -215,6 +223,44 @@ func exportToOrgTxt(data map[string]*PodUsage, filename string) {
 	defer file.Close()
 
 	file.Write([]byte(fmt.Sprintf("%f", res)))
+}
+
+func exportToOrgCsv(data map[string]*PodUsage, filename string) {
+	orgData := make(map[string]float64, len(orgNames))
+	for _, name := range orgNames {
+		orgData[name] = 0.0
+	}
+	for name, usage := range data {
+		ints := make([]int, 0, len(usage.Data))
+		for _, value := range usage.Data {
+			ints = append(ints, value)
+		}
+		yet := true
+		for _, orgName := range orgNames {
+			if strings.Contains(name, orgName) {
+				orgData[orgName] += calculateAverage(ints)
+				yet = false
+				break
+			}
+		}
+		if yet {
+			orgData["app"] += calculateAverage(ints)
+		}
+	}
+
+	file, err := os.Create(filename)
+	if err != nil {
+		fmt.Println("Error creating Csv file:", err)
+		return
+	}
+	defer file.Close()
+
+	writer := csv.NewWriter(file)
+	defer writer.Flush()
+
+	for name, value := range orgData {
+		writer.Write([]string{name, fmt.Sprintf("%f", value)})
+	}
 }
 
 func calculateAverage(values []int) float64 {
