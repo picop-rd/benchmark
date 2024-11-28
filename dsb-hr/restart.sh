@@ -1,4 +1,4 @@
-#!/bin/bash -eux
+#!/bin/bash -ux
 
 # # dsb-hr namespaceのdeploymentのname一覧を取得
 # deployments=$(kubectl get deployments -n dsb-hr -o jsonpath='{.items[*].metadata.name}')
