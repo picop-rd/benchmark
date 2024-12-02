@@ -13,10 +13,10 @@ import (
 	"strings"
 )
 
-const podPrefixLength = len("-6fd889d5dd-fnkpv")
+const podPrefixLength = len("proxy-http-")
 
 var (
-	orgNames = []string{"prox", "ingress", "mongodb", "memcached"}
+	orgNames = []string{"proxy", "service"}
 )
 
 type PodUsage struct {
@@ -123,13 +123,13 @@ func processFile(file *os.File, unixTime int, cpu, memory map[string]*PodUsage, 
 			fmt.Printf("Invalid pod name: %s error: %s\n", parts[0], err)
 			continue // Invalid pod name
 		}
-		if container {
-			podName, err = convertContainerName(podName, parts[1])
-			if err != nil {
-				fmt.Printf("Invalid pod name: %s %s error: %s\n", podName, parts[1], err)
-				continue // Invalid container name
-			}
-		}
+		// if container {
+		// 	podName, err = convertContainerName(podName, parts[1])
+		// 	if err != nil {
+		// 		fmt.Printf("Invalid pod name: %s %s error: %s\n", podName, parts[1], err)
+		// 		continue // Invalid container name
+		// 	}
+		// }
 
 		var rawcpuValue string
 		if container {
@@ -170,23 +170,7 @@ func converPodName(raw string) (string, error) {
 	if len(raw) < podPrefixLength {
 		return "", fmt.Errorf("invalid pod name length: %s", raw)
 	}
-	return raw[:len(raw)-podPrefixLength], nil
-}
-
-func convertContainerName(pod, raw string) (string, error) {
-	pod = strings.Replace(pod, "memcached", "xmc", 1)
-	pod = strings.Replace(pod, "mongodb", "xmo", 1)
-	if strings.Contains(raw, "proxy") {
-		return fmt.Sprintf("prox-%s", pod), nil
-	} else if strings.Contains(raw, "ingress") {
-		return fmt.Sprintf("ingress-%s", pod), nil
-	} else if strings.Contains(raw, "mongo") {
-		return fmt.Sprintf("mongodb-%s", pod), nil
-	} else if strings.Contains(raw, "mmc") {
-		return fmt.Sprintf("memcached-%s", pod), nil
-	} else {
-		return fmt.Sprintf("app-%s", pod), nil
-	}
+	return raw[:podPrefixLength], nil
 }
 
 func convertCPUValue(raw string) (int, error) {

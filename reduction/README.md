@@ -1,5 +1,5 @@
 # Resource Reduction
-You can measure the number of containers under load and autoscaled, and compare resource consumption with and without shared microservices using PiCoP.
+You can measure the number of containers, CPU, Memory, and response time under load and autoscaled, and compare resource consumption with and without shared microservices using PiCoP.
 
 # Preparation
 [Common Steps](../docs/common.md)
@@ -19,13 +19,15 @@ go run timertt/main.go <options>
 
 ## share: yes
 ```bash
-go run timertt/main.go --url http://<Kubernetes Cluster IP address>:30100 --env-id main --req-per-sec 1000 --duration 300 --client-num <the number of environments> --payload 1000 --proxy --picop
+go run timertt/main.go --url http://10.229.71.125:31000 --env-id main --req-per-sec 1000 --duration 300 --payload 1000 --client-num <the number of environments> --proxy --picop
 ```
 
 ## share: no
 ```bash
-go run timertt/main.go --url http://<Kubernetes Cluster IP address>:32 --env-id main --req-per-sec 1000 --duration 300 --client-num 1 --payload 1000
+go run timertt/main.go --url http://10.229.71.125:31000 --env-id main --req-per-sec 1000 --duration 300 --payload 1000 --client-num 1
 ```
 
 # Outputs
-You can use `kubectl` and `k9s` to measure the number of containers.
+```bash
+./benchmark.sh
+```
