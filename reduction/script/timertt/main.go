@@ -5,7 +5,6 @@ import (
 	"context"
 	"flag"
 	"fmt"
-	"log"
 	"net/http"
 	"os"
 	"os/signal"
@@ -27,7 +26,6 @@ var (
 func main() {
 	url := flag.String("url", "", "URL")
 
-	filename := flag.String("filename", "", "output csv file name")
 	envID := flag.String("env-id", "", "PiCoP env-id")
 	picop := flag.Bool("picop", false, "use PiCoP or not")
 	reqPerSec := flag.Int("req-per-sec", 1000, "request per second")
@@ -39,14 +37,6 @@ func main() {
 	flag.Parse()
 
 	reqTotal := *reqPerSec * *reqDuration
-
-	out := fmt.Sprintf("%s.csv", *filename)
-	fmt.Printf("Output file: %s\n", out)
-
-	if _, err := os.Stat(out); err == nil {
-		fmt.Println("output file already exists")
-		return
-	}
 
 	client := http.DefaultClient
 	ctx := context.Background()
@@ -66,14 +56,6 @@ func main() {
 	ctx, cancel := context.WithCancel(ctx)
 
 	data := bytes.Repeat([]byte("0"), *payload)
-
-	type latencyQueue struct {
-		startTime time.Time
-		endTime   time.Time
-	}
-
-	latencyList := make([]latencyQueue, reqTotal)
-	var mu sync.Mutex
 
 	var wg sync.WaitGroup
 
@@ -120,11 +102,7 @@ func main() {
 						req.Header = h
 					}
 
-					queue := latencyQueue{}
-
-					queue.startTime = time.Now()
 					resp, err := client.Do(req)
-					queue.endTime = time.Now()
 					if err != nil {
 						raiseErr(fmt.Sprintf("% 6d;% 3d: send request", count, envNum), err)
 						return
@@ -140,10 +118,6 @@ func main() {
 					smu.Unlock()
 
 					fmt.Printf("% 8d:End  :% 6d;% 3d\n", successCount, count, envNum)
-					mu.Lock()
-					latencyList[count] = queue
-					mu.Unlock()
-					fmt.Printf("End: %d\n", count)
 				}(i, j)
 				i++
 			}
@@ -158,21 +132,6 @@ WAIT:
 END:
 	cancel()
 	fmt.Printf("Complete: err rate: %d / %d / %d\n", errCount, i, reqTotal)
-	fmt.Printf("Output: %s\n", out)
-	file, err := os.Create(out)
-	if err != nil {
-		log.Fatal(err)
-	}
-	defer file.Close()
-	file.WriteString("count, latency, start, end\n")
-	for i, v := range latencyList {
-		start := v.startTime.UnixNano()
-		end := v.endTime.UnixNano()
-		// Use monotonic clocks for latency
-		latency := v.endTime.Sub(v.startTime)
-		fmt.Fprintf(file, "%d, %d, %d, %d\n", i, latency, start, end)
-	}
-	fmt.Println("Complete")
 }
 
 // func divInt(total, div int) []int {
