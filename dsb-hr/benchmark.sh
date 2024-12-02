@@ -46,10 +46,10 @@ trap 'cleanup' SIGINT
 
 ssh onoe-benchmark-1 "cd benchmark/dsb-hr && ./latency/collect.sh '$CMD' ./latency/data/$TYPE/$NAME $TIMESTAMP" &
 
-go run ./resource/collect/main.go -name $NAME -timestamp $TIMESTAMP -dir ./resource/data/input/$TYPE -interval $INTERVAL -duration $DURATION kubectl top pod -n dsb-hr &
+go run ./resource/collect/main.go -name $NAME -timestamp $TIMESTAMP -dir ./resource/data/input/$TYPE -interval $INTERVAL -duration $DURATION kubectl top pod -n dsb-hr --containers &
 
 wait
 
 mkdir -p ./latency/data/$TYPE/$NAME
 scp onoe-benchmark-1:benchmark/dsb-hr/latency/data/$TYPE/$NAME/$TIMESTAMP.txt ./latency/data/$TYPE/$NAME/$TIMESTAMP.txt
-go run ./resource/parse/main.go -name $NAME -timestamp $TIMESTAMP -input ./resource/data/input/$TYPE -output ./resource/data/output/$TYPE
+go run ./resource/parse/main.go -name $NAME -timestamp $TIMESTAMP -input ./resource/data/input/$TYPE -output ./resource/data/output/$TYPE --containers

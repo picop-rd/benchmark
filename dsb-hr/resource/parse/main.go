@@ -28,6 +28,7 @@ func main() {
 	timestamp := flag.String("timestamp", "", "timestamp to exec command (RFC3339)")
 	input := flag.String("input", "", "input dir path")
 	output := flag.String("output", "", "output dir path")
+	container := flag.Bool("containers", false, "container flag")
 	flag.Parse()
 
 	if len(*input) == 0 || len(*output) == 0 || len(*name) == 0 || len(*timestamp) == 0 {
@@ -62,7 +63,7 @@ func main() {
 			defer file.Close()
 
 			log.Printf("processing: %s\n", path)
-			processFile(file, unixTime, cpuUsage, memoryUsage)
+			processFile(file, unixTime, cpuUsage, memoryUsage, *container)
 		}
 		return nil
 	})
@@ -104,7 +105,7 @@ func main() {
 	log.Printf("exported: %s\n", filepath.Join(orgDir, "memory.csv"))
 }
 
-func processFile(file *os.File, unixTime int, cpu, memory map[string]*PodUsage) {
+func processFile(file *os.File, unixTime int, cpu, memory map[string]*PodUsage, container bool) {
 	scanner := bufio.NewScanner(file)
 	for scanner.Scan() {
 		line := scanner.Text()
@@ -116,19 +117,40 @@ func processFile(file *os.File, unixTime int, cpu, memory map[string]*PodUsage) 
 			fmt.Printf("Invalid line: %s\n", line)
 			continue // Invalid line
 		}
+
 		podName, err := converPodName(parts[0])
 		if err != nil {
 			fmt.Printf("Invalid pod name: %s error: %s\n", parts[0], err)
 			continue // Invalid pod name
 		}
-		cpuValue, err := convertCPUValue(parts[1])
+		if container {
+			podName, err = convertContainerName(podName, parts[1])
+			if err != nil {
+				fmt.Printf("Invalid pod name: %s %s error: %s\n", podName, parts[1], err)
+				continue // Invalid container name
+			}
+		}
+
+		var rawcpuValue string
+		if container {
+			rawcpuValue = parts[2]
+		} else {
+			rawcpuValue = parts[1]
+		}
+		cpuValue, err := convertCPUValue(rawcpuValue)
 		if err != nil {
-			fmt.Printf("Invalid CPU value: %s error: %s\n", parts[1], err)
+			fmt.Printf("Invalid CPU value: %s error: %s\n", rawcpuValue, err)
 			continue // Invalid CPU value
 		}
-		memoryValue, err := convertMemoryValue(parts[2])
+		var rawmemoryValue string
+		if container {
+			rawmemoryValue = parts[3]
+		} else {
+			rawmemoryValue = parts[2]
+		}
+		memoryValue, err := convertMemoryValue(rawmemoryValue)
 		if err != nil {
-			fmt.Printf("Invalid memory value: %s error: %s\n", parts[2], err)
+			fmt.Printf("Invalid memory value: %s error: %s\n", rawmemoryValue, err)
 			continue // Invalid memory value
 		}
 
@@ -149,6 +171,22 @@ func converPodName(raw string) (string, error) {
 		return "", fmt.Errorf("invalid pod name length: %s", raw)
 	}
 	return raw[:len(raw)-podPrefixLength], nil
+}
+
+func convertContainerName(pod, raw string) (string, error) {
+	pod = strings.Replace(pod, "memcached", "xmc", 1)
+	pod = strings.Replace(pod, "mongodb", "xmo", 1)
+	if strings.Contains(raw, "proxy") {
+		return fmt.Sprintf("prox-%s", pod), nil
+	} else if strings.Contains(raw, "ingress") {
+		return fmt.Sprintf("ingress-%s", pod), nil
+	} else if strings.Contains(raw, "mongo") {
+		return fmt.Sprintf("mongodb-%s", pod), nil
+	} else if strings.Contains(raw, "mmc") {
+		return fmt.Sprintf("memcached-%s", pod), nil
+	} else {
+		return fmt.Sprintf("app-%s", pod), nil
+	}
 }
 
 func convertCPUValue(raw string) (int, error) {
