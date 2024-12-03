@@ -31,8 +31,8 @@ trap 'cleanup' SIGINT
 
 if [ "$SHARE" = "yes" ]; then
 	CMD="$CMD --client-num $ENVS --proxy --picop"
-	ssh onoe-benchmark-1 "cd benchmark/reduction/script && $CMD"
 else
 	CMD="$CMD --client-num $ENVS"
-	ssh onoe-benchmark-1 "cd benchmark/reduction/script && $CMD"
 fi
+
+ssh onoe-benchmark-1 "cd benchmark/reduction/script && $CMD"
