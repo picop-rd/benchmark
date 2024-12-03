@@ -11,13 +11,8 @@ DURATION=600
 RPS=1000
 
 URL=http://10.229.71.125
-if [ "$SHARE" = "yes" ]; then
-	URL="$URL:30100"
-else
-	URL="$URL:32"
-fi
 
-CMD="/usr/local/go/bin/go run timertt/main.go --url $URL --env-id main --req-per-sec $RPS --duration $DURATION --payload 1000"
+CMD="/usr/local/go/bin/go run timertt/main.go --env-id main --req-per-sec $RPS --duration $DURATION --payload 1000 --env-total $ENVS"
 
 cleanup() {
     echo "SIGINT received, cleaning up..."
@@ -30,9 +25,18 @@ cleanup() {
 trap 'cleanup' SIGINT
 
 if [ "$SHARE" = "yes" ]; then
-	CMD="$CMD --client-num $ENVS --proxy --picop"
-	ssh onoe-benchmark-1 "cd benchmark/reduction/script && $CMD"
-else
-	CMD="$CMD --client-num $ENVS"
-	ssh onoe-benchmark-1 "cd benchmark/reduction/script && $CMD"
+	CMD="$CMD --picop"
 fi
+
+for NUM in $(seq 1 $ENVS); do
+	if [ "$SHARE" = "yes" ]; then
+		ADDR="$URL:30100"
+	else
+		TMP_NUM="000$NUM"
+		ADDR="$URL:32${TMP_NUM: -3}"
+	fi
+	echo "ADDR: $ADDR"
+	ssh onoe-benchmark-1 "cd benchmark/reduction/script && $CMD --env-num $NUM --url $ADDR" &
+done
+
+wait

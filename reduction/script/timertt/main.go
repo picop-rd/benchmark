@@ -30,13 +30,13 @@ func main() {
 	picop := flag.Bool("picop", false, "use PiCoP or not")
 	reqPerSec := flag.Int("req-per-sec", 1000, "request per second")
 	reqDuration := flag.Int("duration", 10, "duration second")
-	clientNum := flag.Int("client-num", 16, "the number of client connections (equals the number of environments if no using proxy)")
 	payload := flag.Int("payload", 1000, "payload byte")
-	useProxy := flag.Bool("proxy", false, "use proxy or not")
+	envNum := flag.Int("env-num", 1, "env number")
+	envTotal := flag.Int("env-total", 10, "env total")
 
 	flag.Parse()
 
-	reqTotal := *reqPerSec * *reqDuration
+	reqTotal := *reqPerSec * *reqDuration / *envTotal
 
 	client := http.DefaultClient
 	ctx := context.Background()
@@ -59,7 +59,7 @@ func main() {
 
 	var wg sync.WaitGroup
 
-	interval := time.Duration(*clientNum) * time.Second / time.Duration(*reqPerSec)
+	interval := time.Duration(*envTotal) * time.Second / time.Duration(*reqPerSec)
 	fmt.Printf("interval: %d", interval)
 
 	ticker := time.NewTicker(interval)
@@ -68,59 +68,48 @@ func main() {
 	stopper := make(chan os.Signal, 1)
 	signal.Notify(stopper, os.Interrupt)
 
-	URLList := make([]string, *clientNum+1)
-	for i := 1; i <= *clientNum; i++ {
-		if *useProxy {
-			URLList[i] = *url
-		} else {
-			URLList[i] = fmt.Sprintf("%s%03d", *url, i) // Change port
-		}
-	}
-
 	i := 0
 	// after := time.After(time.Duration(*reqDuration) * time.Second)
 	for {
 		select {
 		case <-ticker.C:
-			for j := 1; j <= *clientNum; j++ {
-				if i >= reqTotal {
-					goto WAIT
-				}
-				wg.Add(1)
-				go func(count, envNum int) {
-					defer wg.Done()
-					fmt.Printf("% 8d:Start:% 6d;% 3d\n", successCount, count, envNum)
-
-					req, err := http.NewRequestWithContext(ctx, http.MethodGet, URLList[envNum], bytes.NewReader(data))
-					if err != nil {
-						raiseErr(fmt.Sprintf("% 6d;% 3d: making request struct", count, envNum), err)
-						return
-					}
-					if !*picop {
-						h := http.Header{}
-						h.Add(propagation.EnvIDHeader, *envID)
-						req.Header = h
-					}
-
-					resp, err := client.Do(req)
-					if err != nil {
-						raiseErr(fmt.Sprintf("% 6d;% 3d: send request", count, envNum), err)
-						return
-					}
-					resp.Body.Close()
-					if resp.StatusCode != http.StatusOK {
-						raiseErr(fmt.Sprintf("% 6d;% 3d: status code not 200, %d", count, envNum, resp.StatusCode), err)
-						return
-					}
-
-					smu.Lock()
-					successCount += 1
-					smu.Unlock()
-
-					fmt.Printf("% 8d:End  :% 6d;% 3d\n", successCount, count, envNum)
-				}(i, j)
-				i++
+			if i >= reqTotal {
+				goto WAIT
 			}
+			wg.Add(1)
+			go func(count, envNum int) {
+				defer wg.Done()
+				fmt.Printf("% 8d:Start:% 6d;% 3d\n", successCount, count, envNum)
+
+				req, err := http.NewRequestWithContext(ctx, http.MethodGet, *url, bytes.NewReader(data))
+				if err != nil {
+					raiseErr(fmt.Sprintf("% 6d;% 3d: making request struct", count, envNum), err)
+					return
+				}
+				if !*picop {
+					h := http.Header{}
+					h.Add(propagation.EnvIDHeader, *envID)
+					req.Header = h
+				}
+
+				resp, err := client.Do(req)
+				if err != nil {
+					raiseErr(fmt.Sprintf("% 6d;% 3d: send request", count, envNum), err)
+					return
+				}
+				resp.Body.Close()
+				if resp.StatusCode != http.StatusOK {
+					raiseErr(fmt.Sprintf("% 6d;% 3d: status code not 200, %d", count, envNum, resp.StatusCode), err)
+					return
+				}
+
+				smu.Lock()
+				successCount += 1
+				smu.Unlock()
+
+				fmt.Printf("% 8d:End  :% 6d;% 3d\n", successCount, count, envNum)
+			}(i, *envNum)
+			i++
 		case <-stopper:
 			goto END
 			// case <-after:
