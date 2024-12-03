@@ -19,15 +19,15 @@ go run timertt/main.go <options>
 
 ## share: yes
 ```bash
-go run timertt/main.go --url http://10.229.71.125:31000 --env-id main --req-per-sec 1000 --duration 300 --payload 1000 --client-num <the number of environments> --proxy --picop
+./load.sh yes <ENVS>
 ```
 
 ## share: no
 ```bash
-go run timertt/main.go --url http://10.229.71.125:31000 --env-id main --req-per-sec 1000 --duration 300 --payload 1000 --client-num 1
+./load.sh no <ENVS>
 ```
 
 # Outputs
 ```bash
-./benchmark.sh
+./benchmark.sh <PREFIX> <yes or no> <ENVS>
 ```

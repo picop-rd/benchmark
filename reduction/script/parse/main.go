@@ -13,8 +13,6 @@ import (
 	"strings"
 )
 
-const podPrefixLength = len("proxy-http-")
-
 var (
 	orgNames = []string{"proxy", "service"}
 )
@@ -118,18 +116,7 @@ func processFile(file *os.File, unixTime int, cpu, memory map[string]*PodUsage, 
 			continue // Invalid line
 		}
 
-		podName, err := converPodName(parts[0])
-		if err != nil {
-			fmt.Printf("Invalid pod name: %s error: %s\n", parts[0], err)
-			continue // Invalid pod name
-		}
-		// if container {
-		// 	podName, err = convertContainerName(podName, parts[1])
-		// 	if err != nil {
-		// 		fmt.Printf("Invalid pod name: %s %s error: %s\n", podName, parts[1], err)
-		// 		continue // Invalid container name
-		// 	}
-		// }
+		podName := parts[0]
 
 		var rawcpuValue string
 		if container {
@@ -164,13 +151,6 @@ func processFile(file *os.File, unixTime int, cpu, memory map[string]*PodUsage, 
 		}
 		memory[podName].Data[unixTime] = memoryValue
 	}
-}
-
-func converPodName(raw string) (string, error) {
-	if len(raw) < podPrefixLength {
-		return "", fmt.Errorf("invalid pod name length: %s", raw)
-	}
-	return raw[:podPrefixLength], nil
 }
 
 func convertCPUValue(raw string) (int, error) {
