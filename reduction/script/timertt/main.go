@@ -59,11 +59,8 @@ func main() {
 
 	var wg sync.WaitGroup
 
-	interval := time.Duration(*clientNum) * time.Second / time.Duration(*reqPerSec)
-	fmt.Printf("interval: %d", interval)
-
-	ticker := time.NewTicker(interval)
-	defer ticker.Stop()
+	miniTicker := time.NewTicker(time.Second / time.Duration(*reqPerSec))
+	defer miniTicker.Stop()
 
 	stopper := make(chan os.Signal, 1)
 	signal.Notify(stopper, os.Interrupt)
@@ -80,12 +77,12 @@ func main() {
 	i := 0
 	// after := time.After(time.Duration(*reqDuration) * time.Second)
 	for {
-		select {
-		case <-ticker.C:
-			for j := 1; j <= *clientNum; j++ {
-				if i >= reqTotal {
-					goto WAIT
-				}
+		for j := 1; j <= *clientNum; j++ {
+			if i >= reqTotal {
+				goto WAIT
+			}
+			select {
+			case <-miniTicker.C:
 				wg.Add(1)
 				go func(count, envNum int) {
 					defer wg.Done()
@@ -120,11 +117,9 @@ func main() {
 					fmt.Printf("% 8d:End  :% 6d;% 3d\n", successCount, count, envNum)
 				}(i, j)
 				i++
+			case <- stopper:
+				goto END
 			}
-		case <-stopper:
-			goto END
-			// case <-after:
-			// 	goto END
 		}
 	}
 WAIT:
