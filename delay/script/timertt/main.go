@@ -68,7 +68,7 @@ func main() {
 
 	var wg sync.WaitGroup
 
-	interval := time.Second / time.Duration(*reqPerSec)
+	interval := time.Duration(*clientNum) * time.Second / time.Duration(*reqPerSec)
 	fmt.Printf("interval: %d", interval)
 
 	ticker := time.NewTicker(interval)
@@ -80,9 +80,9 @@ func main() {
 	i := 0
 	// after := time.After(time.Duration(*reqDuration) * time.Second)
 	for {
-		for j := 0; j < *clientNum; j++ {
-			select {
-			case <-ticker.C:
+		select {
+		case <-ticker.C:
+			for j := 0; j < *clientNum; j++ {
 				if i >= reqTotal {
 					goto WAIT
 				}
@@ -123,11 +123,11 @@ func main() {
 					fmt.Printf("End: %d\n", count)
 				}(i)
 				i++
-			case <-stopper:
-				goto END
-				// case <-after:
-				// 	goto END
 			}
+		case <-stopper:
+			goto END
+			// case <-after:
+			// 	goto END
 		}
 	}
 WAIT:

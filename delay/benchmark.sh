@@ -39,10 +39,6 @@ fi
 
 CMD="/usr/local/go/bin/go run script/timertt/main.go --url $URL --prefix $NAME --env-id main --req-per-sec $RPS --duration $DURATION --client-num $CLIENT --payload 1000 $OPTION"
 
-echo "NAME: $NAME"
-echo "CMD: $CMD"
-echo "TIMESTAMP: $TIMESTAMP"
-
 cleanup() {
     echo "SIGINT received, cleaning up..."
     ssh onoe-benchmark-1 "pkill -2 --echo 'go'"
@@ -57,3 +53,7 @@ ssh onoe-benchmark-1 "cd benchmark/delay && $CMD"
 
 mkdir -p ./data/$PREFIX/$TYPE/$CLIENT-$RPS-$DURATION
 scp onoe-benchmark-1:benchmark/delay/$NAME.csv ./$NAME.csv
+
+echo "NAME: $NAME"
+echo "CMD: $CMD"
+echo "TIMESTAMP: $TIMESTAMP"
