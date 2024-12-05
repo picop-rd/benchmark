@@ -1,14 +1,16 @@
-#!/bin/bash -eux
+#!/bin/bash -ux
 
-# # dsb-hr namespaceのdeploymentのname一覧を取得
-# deployments=$(kubectl get deployments -n dsb-hr -o jsonpath='{.items[*].metadata.name}')
+cd istio
+kubectl delete -f namespace.yaml
+kubectl apply -f namespace.yaml
+kubectl apply -f gateway.yaml
+kubectl apply -f vs.yaml
+kubectl apply -f ingressgateway-svc.yaml
 
-# # 取得したdeploymentそれぞれでkubectl rollout restartコマンドを実行
-# for deployment in $deployments
-# do
-#     kubectl rollout restart deployment/$deployment -n dsb-hr
-#     echo "Restarted deployment: $deployment"
-# done
+cd ../kubernetes/manifests
 
-kubectl delete -Rf ./kubernetes/manifests
-kubectl apply -Rf ./kubernetes/manifests
+kubectl delete -f namespace.yaml
+kubectl apply -f namespace.yaml
+kubectl apply -f proxy-both.yaml
+./script/create-service.sh http main 32001 | kubectl -n service apply -f -
+./script/create-service.sh http main 32002 | kubectl -n service-istio apply -f -

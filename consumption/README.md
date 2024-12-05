@@ -5,17 +5,12 @@ You can measure proxy resource consumption (vCPU and memory).
 [Common Steps](../docs/common.md)
 
 ```bash
-cd kubernetes/manifests
-kubectl apply -f namespace.yaml
-kubectl apply -f proxy-http.yaml
-kubectl apply -f service.yaml
+./restart.sh
 ```
 
 # Measurements
-Please change --req-per-sec from 1~10000
 ```bash
-cd script
-go run --url http://<Kubernetes Cluster URL>:32001 --env-id main --req-per-sec 1000 --duration 90 --client-num 1 --payload 1000 --picop
+./benchmark.sh <type> <prefix> <rps>
 ```
 
 # Outputs

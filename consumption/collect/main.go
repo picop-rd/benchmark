@@ -15,7 +15,6 @@ import (
 )
 
 func main() {
-	dir := flag.String("dir", "", "directory to save data")
 	name := flag.String("name", "", "project name")
 	timestamp := flag.String("timestamp", "", "timestamp to exec command (RFC3339)")
 	interval := flag.Int("interval", 10, "interval to exec command (second)")
@@ -23,14 +22,13 @@ func main() {
 	flag.Parse()
 	cmd := flag.Args()
 
-	fmt.Printf("dir: %s\n", *dir)
 	fmt.Printf("name: %s\n", *name)
 	fmt.Printf("timestamp: %s\n", *timestamp)
 	fmt.Printf("interval: %d\n", *interval)
 	fmt.Printf("duration: %d\n", *duration)
 	fmt.Printf("cmd: %s\n", strings.Join(cmd, " "))
 
-	if len(*dir) == 0 || len(*name) == 0 || *interval == 0 || *duration == 0 || len(cmd) < 2 || len(*timestamp) == 0 {
+	if len(*name) == 0 || *interval == 0 || *duration == 0 || len(cmd) < 2 || len(*timestamp) == 0 {
 		flag.Usage()
 		return
 	}
@@ -44,7 +42,7 @@ func main() {
 		cancel()
 	}()
 
-	dirname := filepath.Join(*dir, *name, *timestamp)
+	dirname := filepath.Join(*name, *timestamp)
 	if _, err := os.Stat(dirname); err == nil {
 		fmt.Printf("duplicated timestamp: %s\n", dirname)
 		return

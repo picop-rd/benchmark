@@ -1,34 +1,55 @@
 #!/bin/bash -eux
 
-if [ "$#" -ne 1 ]; then
-	echo "Usage: $0 <prefix>"
+if [ "$#" -ne 3 ]; then
+	echo "Usage: $0 <type> <prefix> <rps>"
 	exit 1
 fi
 
-PREFIX=$1
+TYPE=$1
+PREFIX=$2
+RPS=#3
 
-URL="http://10.229.71.125:32001"
-ENVID=main
+# TYPE=base
+# TYPE=base+picop
+# TYPE=base+gw+istio
+# TYPE=base+gw+picop
+
 DURATION=300
-CONN=1
-RPS=1000
-PAYLOAD=1000
+CLIENT=1
 
-INTERVAL=10
-
-NAME="$PREFIX/$ENVID-$CONN-$RPS-$DURATION-$PAYLOAD-$INTERVAL"
 TIMESTAMP=$(date +%s)
+NAME="$PREFIX/$TYPE/$CLIENT-$RPS-$DURATION/$TIMESTAMP"
 
-CMD="/usr/local/go/bin/go run ./script/main.go --url $URL --env-id $ENVID --req-per-sec $RPS --duration $DURATION --client-num $CONN --payload $PAYLOAD --picop"
+if [ "$TYPE" = "base" ]; then
+    echo "Invalid type: $TYPE"
+    exit 1
+    # URL="http://service-istio.service-istio.svc.cluster.local:32001"
+    # OPTION=""
+    # NS="service"
+elif [ "$TYPE" = "base+picop" ]; then
+    echo "Invalid type: $TYPE"
+    exit 1
+    # URL="http://service-istio.service-istio.svc.cluster.local:31002"
+    # OPTION="--picop"
+    # NS="service"
+elif [ "$TYPE" = "base+gw+istio" ]; then
+    URL="http://service-istio.service-istio.svc.cluster.local:30001"
+    OPTION=""
+    NS="service-istio"
+elif [ "$TYPE" = "base+gw+picop" ]; then
+    URL="http://proxy-both.service.svc.cluster.local:30002"
+    OPTION="--picop"
+    NS="service"
+else
+    echo "Invalid type: $TYPE"
+    exit 1
+fi
 
-echo "NAME: $NAME"
-echo "TIMESTAMP: $TIMESTAMP"
+CMD="/usr/local/go/bin/go run script/main.go --url $URL --env-id main --req-per-sec $RPS --duration $DURATION --client-num $CLIENT --payload 1000 $OPTION"
 
 cleanup() {
     echo "SIGINT received, cleaning up..."
-    ssh onoe-benchmark "pkill -2 --echo 'go'"
-    ssh onoe-benchmark "pkill -2 --echo 'tee'"
-    ssh onoe-benchmark "pkill -2 --echo 'exec-cmd.sh'"
+    ssh onoe-benchmark-1 "pkill -2 --echo 'go'"
 
     kill $(jobs -p)
     exit 1
@@ -36,12 +57,15 @@ cleanup() {
 
 trap 'cleanup' SIGINT
 
-ssh onoe-benchmark "cd benchmark/consumption && ./exec-cmd.sh '$CMD' ./data/cmd/$NAME $TIMESTAMP" &
+ssh onoe-benchmark-1 "cd benchmark/delay && $CMD" &
 
-go run ./collect/main.go -name $NAME -timestamp $TIMESTAMP -dir ./data/input -interval $INTERVAL -duration $DURATION kubectl top pod -n service-proxy &
+go run ./collect/main.go -name ./data/input/$NAME -timestamp $TIMESTAMP -interval $INTERVAL -duration $DURATION kubectl top pod -n $NS --containers &
 
 wait
 
-mkdir -p ./data/cmd/$NAME
-scp onoe-benchmark:benchmark/consumption/data/cmd/$NAME/$TIMESTAMP.txt ./data/cmd/$NAME/$TIMESTAMP.txt
+mkdir -p ./data/$PREFIX/$TYPE/$CLIENT-$RPS-$DURATION
 go run ./parse/main.go -name $NAME -timestamp $TIMESTAMP -input ./data/input -output ./data/output
+
+echo "NAME: $NAME"
+echo "CMD: $CMD"
+echo "TIMESTAMP: $TIMESTAMP"
