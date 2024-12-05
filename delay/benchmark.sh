@@ -1,12 +1,13 @@
 #!/bin/bash -eux
 
-if [ "$#" -ne 1 ]; then
+if [ "$#" -ne 3 ]; then
 	echo "Usage: $0 <type> <prefix> <client>"
 	exit 1
 fi
 
-PREFIX=$1
-CLIENT=$2
+TYPE=$1
+PREFIX=$2
+CLIENT=$3
 
 # TYPE=base
 # TYPE=base+picop
@@ -36,7 +37,7 @@ else
 	exit 1
 fi
 
-CMD="/usr/local/go/bin/go run timertt/main.go --url $URL --prefix $NAME --env-id main --req-per-sec $RPS --duration $DURATION --client-num $CLIENT --payload 1000 $OPTION"
+CMD="/usr/local/go/bin/go run script/timertt/main.go --url $URL --prefix $NAME --env-id main --req-per-sec $RPS --duration $DURATION --client-num $CLIENT --payload 1000 $OPTION"
 
 echo "NAME: $NAME"
 echo "CMD: $CMD"
@@ -52,7 +53,7 @@ cleanup() {
 
 trap 'cleanup' SIGINT
 
-ssh onoe-benchmark-1 "cd benchmark/consumption && $CMD"
+ssh onoe-benchmark-1 "cd benchmark/delay && $CMD"
 
 mkdir -p ./data/$PREFIX/$TYPE/$CLIENT-$RPS-$DURATION
-scp onoe-benchmark-1:benchmark/consumption/$NAME.csv ./$NAME.csv
+scp onoe-benchmark-1:benchmark/delay/$NAME.csv ./$NAME.csv

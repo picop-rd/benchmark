@@ -9,6 +9,7 @@ import (
 	"net/http"
 	"os"
 	"os/signal"
+	"path/filepath"
 	"sync"
 	"time"
 
@@ -134,6 +135,10 @@ WAIT:
 END:
 	cancel()
 	fmt.Printf("Output: %s\n", out)
+	err := os.MkdirAll(filepath.Dir(out), 0755)
+	if err != nil {
+		log.Fatal(err)
+	}
 	file, err := os.Create(out)
 	if err != nil {
 		log.Fatal(err)
