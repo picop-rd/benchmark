@@ -30,7 +30,7 @@ elif [ "$TYPE" = "base+gw+istio" ]; then
 	URL="http://service-istio.service-istio.svc.cluster.local:30001"
 	OPTION=""
 elif [ "$TYPE" = "base+gw+picop" ]; then
-	URL="hhttp://proxy-both.service.svc.cluster.local:30002"
+	URL="http://proxy-both.service.svc.cluster.local:30002"
 	OPTION="--picop"
 else
 	echo "Invalid type: $TYPE"
