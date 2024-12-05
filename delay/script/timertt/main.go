@@ -30,10 +30,9 @@ func main() {
 
 	flag.Parse()
 
-	now := time.Now().Local().Format(time.RFC3339)
 	reqTotal := *reqPerSec * *reqDuration
 
-	out := fmt.Sprintf("%s-rtt-%s-%t-%d-%d-%d-%d-%s.csv", *prefix, *envID, *picop, *reqPerSec, *reqDuration, *clientNum, *payload, now)
+	out := fmt.Sprintf("%s.csv", *prefix)
 	fmt.Printf("Output file: %s\n", out)
 
 	if _, err := os.Stat(out); err == nil {
@@ -68,7 +67,7 @@ func main() {
 
 	var wg sync.WaitGroup
 
-	interval := time.Duration(*clientNum) * time.Second / time.Duration(*reqPerSec)
+	interval := time.Second / time.Duration(*reqPerSec)
 	fmt.Printf("interval: %d", interval)
 
 	ticker := time.NewTicker(interval)
@@ -80,9 +79,9 @@ func main() {
 	i := 0
 	// after := time.After(time.Duration(*reqDuration) * time.Second)
 	for {
-		select {
-		case <-ticker.C:
-			for j := 0; j < *clientNum; j++ {
+		for j := 0; j < *clientNum; j++ {
+			select {
+			case <-ticker.C:
 				if i >= reqTotal {
 					goto WAIT
 				}
@@ -123,11 +122,11 @@ func main() {
 					fmt.Printf("End: %d\n", count)
 				}(i)
 				i++
+			case <-stopper:
+				goto END
+				// case <-after:
+				// 	goto END
 			}
-		case <-stopper:
-			goto END
-			// case <-after:
-			// 	goto END
 		}
 	}
 WAIT:

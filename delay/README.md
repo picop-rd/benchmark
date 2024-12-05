@@ -35,27 +35,22 @@ kubectl apply -f ingressgateway-svc.yaml
 ```
 
 # Measurements
-```bash
-cd script
-go run timertt/main.go <options>
-```
-
 Please change --client-num from 1~64
 ### base
 ```bash
-go run timertt/main.go --url http://service-istio.service-istio.svc.cluster.local:32001 --prefix base --env-id main --req-per-sec 1000 --duration 10 --client-num 1 --payload 1000
+./benchmark.sh base <PREFIX> <CLIENT>
 ```
-### base+proposed
+### base+picop
 ```bash
-go run timertt/main.go --url http://service-istio.service-istio.svc.cluster.local:31002 --prefix base+proposed --env-id main --req-per-sec 1000 --duration 10 --client-num 1 --payload 1000 --picop
+./benchmark.sh base+picop <PREFIX> <CLIENT>
 ```
 ### base+gw+istio
 ```bash
-go run timertt/main.go --url http://service-istio.service-istio.svc.cluster.local:30001 --prefix base+gw+istio --env-id main --req-per-sec 1000 --duration 10 --client-num 1 --payload 1000
+./benchmark.sh base+gw+istio <PREFIX> <CLIENT>
 ```
-### base+gw+proposed
+### base+gw+picop
 ```bash
-go run timertt/main.go --url http://proxy-both.service.svc.cluster.local:30002 --prefix base+gw+proposed --env-id main --req-per-sec 1000 --duration 10 --client-num 1 --payload 1000 --picop
+./benchmark.sh base+gw+picop <PREFIX> <CLIENT>
 ```
 
 # Outputs
