@@ -1,38 +1,42 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: service-http-main
-  namespace: service
+  name: service-$(PROTO)-$(ENV)
   labels:
-    env: main
+    env: $(ENV)
 spec:
-  replicas: 1
   selector:
     matchLabels:
-      app: service-http-main
+      app: service-$(PROTO)-$(ENV)
   template:
     metadata:
       labels:
-        app: service-http-main
+        app: service-$(PROTO)-$(ENV)
     spec:
-      nodeName: onoe-k8s-2
       containers:
         - name: service
           image: nginx:1.23.3
           imagePullPolicy: Always
           ports:
             - containerPort: 80
+          resources:
+            limits:
+              cpu: "2"
+              memory: 1Gi
+            requests:
+              cpu: 100m
+              memory: 128Mi
 ---
 apiVersion: v1
 kind: Service
 metadata:
-  name: service-http-main
-  namespace: service
+  name: service-$(PROTO)-$(ENV)
 spec:
   type: NodePort
   selector:
-    app: service-http-main
+    app: service-$(PROTO)-$(ENV)
   ports:
     - protocol: TCP
       port: 80
       targetPort: 80
+      nodePort: $(PORT)

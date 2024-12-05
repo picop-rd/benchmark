@@ -1,0 +1,42 @@
+apiVersion: networking.istio.io/v1beta1
+kind: VirtualService
+metadata:
+  name: service-istio
+  namespace: service-istio
+spec:
+  hosts:
+  - service-istio.service-istio.svc.cluster.local 
+  gateways:
+  - mesh
+  - gateway
+  http:
+  - match:
+    - headers:
+        env-id: 
+          exact: feature-1
+    route:
+    - destination:
+        host: service-http-feature-1.service-istio.svc.cluster.local
+  - route:
+    - destination:
+        host: service-http-main.service-istio.svc.cluster.local
+---
+apiVersion: networking.istio.io/v1beta1
+kind: VirtualService
+metadata:
+  name: proxy-both
+  namespace: service-istio
+spec:
+  hosts:
+  - proxy-both.service.svc.cluster.local 
+  gateways:
+  - mesh
+  - gateway
+  tcp:
+  - match:
+    - port: 9080
+    route:
+    - destination:
+        host: proxy-both.service.svc.cluster.local
+        port:
+          number: 80
