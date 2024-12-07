@@ -13,8 +13,6 @@ import (
 	"strings"
 )
 
-const podPrefixLength = len("-6fd889d5dd-fnkpv")
-
 type PodUsage struct {
 	Data map[int]int
 }
@@ -108,19 +106,19 @@ func processFile(file *os.File, unixTime int, cpu, memory map[string]*PodUsage) 
 			fmt.Printf("Invalid line: %s\n", line)
 			continue // Invalid line
 		}
-		podName, err := converPodName(parts[0])
-		if err != nil {
-			fmt.Printf("Invalid pod name: %s error: %s\n", parts[0], err)
-			continue // Invalid pod name
+		podName := parts[1]
+		if !strings.Contains(podName, "proxy") {
+			continue // not proxy
 		}
-		cpuValue, err := convertCPUValue(parts[1])
+
+		cpuValue, err := convertCPUValue(parts[2])
 		if err != nil {
-			fmt.Printf("Invalid CPU value: %s error: %s\n", parts[1], err)
+			fmt.Printf("Invalid CPU value: %s error: %s\n", parts[2], err)
 			continue // Invalid CPU value
 		}
-		memoryValue, err := convertMemoryValue(parts[2])
+		memoryValue, err := convertMemoryValue(parts[3])
 		if err != nil {
-			fmt.Printf("Invalid memory value: %s error: %s\n", parts[2], err)
+			fmt.Printf("Invalid memory value: %s error: %s\n", parts[3], err)
 			continue // Invalid memory value
 		}
 
@@ -134,13 +132,6 @@ func processFile(file *os.File, unixTime int, cpu, memory map[string]*PodUsage) 
 		}
 		memory[podName].Data[unixTime] = memoryValue
 	}
-}
-
-func converPodName(raw string) (string, error) {
-	if len(raw) < podPrefixLength {
-		return "", fmt.Errorf("invalid pod name length: %s", raw)
-	}
-	return raw[:len(raw)-podPrefixLength], nil
 }
 
 func convertCPUValue(raw string) (int, error) {

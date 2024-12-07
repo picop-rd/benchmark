@@ -22,13 +22,6 @@ spec:
               containerPort: 80
             - name: admin
               containerPort: 9000
-          resources:
-            limits:
-              cpu: "2"
-              memory: 1Gi
-            requests:
-              cpu: 100m
-              memory: 128Mi
 
 ---
 apiVersion: v1

@@ -14,7 +14,7 @@ RPS=$3
 # TYPE=base+gw+istio
 # TYPE=base+gw+picop
 
-DURATION=300
+DURATION=60
 CLIENT=1
 INTERVAL=10
 
@@ -51,6 +51,7 @@ CMD="/usr/local/go/bin/go run script/main.go --url $URL --env-id main --req-per-
 cleanup() {
     echo "SIGINT received, cleaning up..."
     ssh onoe-benchmark-1 "pkill -2 --echo 'go'"
+    # ssh onoe-benchmark-2 "pkill -2 --echo 'go'"
 
     kill $(jobs -p)
     exit 1
@@ -58,13 +59,13 @@ cleanup() {
 
 trap 'cleanup' SIGINT
 
-ssh onoe-benchmark-1 "cd benchmark/delay && $CMD" &
+ssh onoe-benchmark-1 "cd benchmark/consumption && $CMD" &
+# ssh onoe-benchmark-2 "cd benchmark/consumption && $CMD" &
 
 go run ./collect/main.go -name ./data/input/$NAME -timestamp $TIMESTAMP -interval $INTERVAL -duration $DURATION kubectl top pod -n $NS --containers &
 
 wait
 
-mkdir -p ./data/$PREFIX/$TYPE/$CLIENT-$RPS-$DURATION
 go run ./parse/main.go -name $NAME -timestamp $TIMESTAMP -input ./data/input -output ./data/output
 
 echo "NAME: $NAME"

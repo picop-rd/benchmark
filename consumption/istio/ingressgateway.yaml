@@ -55,8 +55,19 @@ spec:
         service.istio.io/canonical-revision: latest
         sidecar.istio.io/inject: "false"
     spec:
+      tolerations:
+      - key: "app"
+        operator: "Exists"
+        effect: "NoSchedule"
       affinity:
-        nodeAffinity: {}
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+            - matchExpressions:
+              - key: kubernetes.io/hostname
+                operator: In
+                values:
+                - onoe-k8s-2
       containers:
       - args:
         - proxy
@@ -138,13 +149,6 @@ spec:
           periodSeconds: 2
           successThreshold: 1
           timeoutSeconds: 1
-        resources:
-          limits:
-            cpu: "2"
-            memory: 1Gi
-          requests:
-            cpu: 100m
-            memory: 128Mi
         securityContext:
           allowPrivilegeEscalation: false
           capabilities:
