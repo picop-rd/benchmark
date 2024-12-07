@@ -14,7 +14,7 @@ RPS=$3
 # TYPE=base+gw+istio
 # TYPE=base+gw+picop
 
-DURATION=60
+DURATION=300
 CLIENT=1
 INTERVAL=10
 
