@@ -59,8 +59,10 @@ cleanup() {
 
 trap 'cleanup' SIGINT
 
-ssh onoe-benchmark-1 "cd benchmark/consumption && $CMD" &
-# ssh onoe-benchmark-2 "cd benchmark/consumption && $CMD" &
+if [ "$RPS" -gt 0 ]; then
+    ssh onoe-benchmark-1 "cd benchmark/consumption && $CMD" &
+    # ssh onoe-benchmark-2 "cd benchmark/consumption && $CMD" &
+fi
 
 go run ./collect/main.go -name ./data/input/$NAME -timestamp $TIMESTAMP -interval $INTERVAL -duration $DURATION kubectl top pod -n $NS --containers &
 
